@@ -3,8 +3,12 @@ import { useContext, useEffect, useState } from "react";
 import { apiList } from "../../context/apiList";
 import axios from "axios";
 import PopupModal from "./AddCourse/AddCourse";
+import { AppContext } from "../../context/AppContext";
+import { useNavigate } from "react-router";
 
 const Instructor = () => {
+  const { state } = useContext(AppContext);
+  console.log(state, "==============================");
   const [getCourse, setGetCourse] = useState({});
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,6 +16,7 @@ const Instructor = () => {
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
   const [editeData, setEditeData] = useState({});
+  const navigate = useNavigate();
   useEffect(() => {
     setLoading(true);
     try {
@@ -81,6 +86,9 @@ const Instructor = () => {
       } catch (err) {
         alert("something went wrong!");
       }
+    } else if (upload?.data?.code === 500) {
+      localStorage.removeItem("elearningToken");
+      navigate("/elearning");
     }
   };
   return (

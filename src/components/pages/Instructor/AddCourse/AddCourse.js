@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./addcourse.css"; // Assuming you have your CSS styles
 import axios from "axios";
 import { apiList } from "../../../context/apiList";
+import { useNavigate } from "react-router";
 
 const PopupModal = ({
   isOpen,
@@ -19,6 +20,8 @@ const PopupModal = ({
   const [questionName, setQuestionName] = useState("");
   const [quizOptions, setQuizOptions] = useState([""]);
   const [correctAnswer, setCorrectAnswer] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate;
   // Handle file upload
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -57,6 +60,7 @@ const PopupModal = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     // edite function
     if (Object.keys(editeData).length) {
       if (video) {
@@ -94,6 +98,9 @@ const PopupModal = ({
               },
             }
           );
+          if (upload.data) {
+            setLoading(false);
+          }
           if (upload.data.code === 200) {
             alert(upload.data.msg);
             setUploadSts(true);
@@ -104,12 +111,61 @@ const PopupModal = ({
             setQuizOptions([""]);
             setCorrectAnswer("");
             onClose();
+          } else if (upload?.data?.code === 500) {
+            localStorage.removeItem("elearningToken");
+            navigate("/elearning");
           } else {
             alert(upload.data.msg);
           }
         }
       } else {
-        alert("File size exceeds 50MB. Please upload a smaller video.");
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("course_id", editeData?._id);
+        formData.append("description", description);
+        formData.append(
+          "quizzes",
+          JSON.stringify([
+            {
+              question: questionName,
+              options: quizOptions,
+              correctAnswer: correctAnswer,
+            },
+          ])
+        );
+
+        const upload = await axios.post(
+          `${
+            process.env.REACT_APP_BACKEND_URL
+              ? process.env.REACT_APP_BACKEND_URL
+              : window.location.origin
+          }/api/elearning${apiList.editeCourse}`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("elearningToken")}`,
+            },
+          }
+        );
+        if (upload.data) {
+          setLoading(false);
+        }
+        if (upload.data.code === 200) {
+          alert(upload.data.msg);
+          setUploadSts(true);
+          setTitle("");
+          setDescription("");
+          setVideo(null);
+          setQuestionName("");
+          setQuizOptions([""]);
+          setCorrectAnswer("");
+          onClose();
+        } else if (upload?.data?.code === 500) {
+          localStorage.removeItem("elearningToken");
+          navigate("/elearning");
+        } else {
+          alert(upload.data.msg);
+        }
       }
     } else {
       console.log({
@@ -154,10 +210,16 @@ const PopupModal = ({
               },
             }
           );
+          if (upload.data) {
+            setLoading(false);
+          }
           if (upload.data.code === 200) {
             alert("created success");
             setUploadSts(true);
             onClose();
+          } else if (upload?.data?.code === 500) {
+            localStorage.removeItem("elearningToken");
+            navigate("/elearning");
           } else {
             alert(upload.data.msg);
           }
@@ -224,7 +286,7 @@ const PopupModal = ({
               type="file"
               onChange={handleFileChange}
               accept="video/*"
-              required
+              required={Object.keys(editeData).length === 0}
             />
           </div>
 
@@ -271,10 +333,22 @@ const PopupModal = ({
             />
           </div>
           {Object.keys(editeData).length === 0 && (
-            <button type="submit">Submit</button>
+            <button
+              style={{ cursor: loading ? "not-allowed" : "pointer" }}
+              disabled={loading}
+              type="submit"
+            >
+              {loading ? "loading..." : "Submit"}
+            </button>
           )}
           {Object.keys(editeData).length !== 0 && (
-            <button type="submit">Edite</button>
+            <button
+              style={{ cursor: loading ? "not-allowed" : "pointer" }}
+              disabled={loading}
+              type="submit"
+            >
+              {loading ? "loading..." : "Edit"}
+            </button>
           )}
         </form>
       </div>

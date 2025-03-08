@@ -3,10 +3,12 @@ import { apiList } from "../context/apiList";
 import axios from "axios";
 import jsPDF from "jspdf";
 import "./student.css";
+import { useNavigate } from "react-router";
 const Student = () => {
   const [getCourse, setGetCourse] = useState({});
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState({});
+  const navigate = useNavigate();
   useEffect(() => {
     setLoading(true);
     try {
@@ -81,6 +83,9 @@ const Student = () => {
         } catch (err) {
           alert("something went wrong!");
         }
+      } else if (submitAns?.code === 500) {
+        localStorage.removeItem("elearningToken");
+        navigate("/elearning");
       } else {
         alert(submitres?.msg);
       }

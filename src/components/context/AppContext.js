@@ -2,7 +2,7 @@ import axios from "axios";
 import { createContext, useReducer } from "react";
 
 export const AppContext = createContext();
-const Context = ({ Children }) => {
+const Context = (props) => {
   const initialState = {
     // instructor
     getCourse: {},
@@ -50,7 +50,7 @@ const Context = ({ Children }) => {
     <AppContext.Provider
       value={{ apiPOSTMethod: apiPOSTMethod, state, apiGETMethod }}
     >
-      {Children}
+      {props.children}
     </AppContext.Provider>
   );
 };

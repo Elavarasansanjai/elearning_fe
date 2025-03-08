@@ -34,6 +34,7 @@ const Auth = ({ type, Component }) => {
           } else {
             setIsUser(false);
             alert(upload?.data?.msg);
+            localStorage.removeItem("elearningToken");
             navigate("/elearning");
           }
         });

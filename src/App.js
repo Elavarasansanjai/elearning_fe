@@ -9,6 +9,7 @@ import Register from "./components/pages/register/register";
 import Instructor from "./components/pages/Instructor/Instructor";
 import Auth from "./components/pages/Auth/Auth";
 import Student from "./components/Student/student";
+import React from "react";
 
 const router = createBrowserRouter([
   {
@@ -33,9 +34,11 @@ const router = createBrowserRouter([
 
 function App() {
   return (
-    <RouterProvider router={router}>
-      <Context></Context>
-    </RouterProvider>
+    <React.Fragment>
+      <Context>
+        <RouterProvider router={router}></RouterProvider>
+      </Context>
+    </React.Fragment>
   );
 }
 
